@@ -1,0 +1,115 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+        
+
+model User {
+  id          String      @id @default(uuid())
+  name        String
+  phoneNumber String      @unique
+  email       String?     @unique
+  password    String
+  companyName String?
+  logo        String?
+  timezone    String      @default("UTC")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  jobs        Job[]
+  estimates   Estimate[]
+  contacts    Contact[]
+  aiMessages  AiMessage[]
+}
+
+model Job {
+  id         String    @id @default(uuid())
+  name       String
+  address    String
+  price      Float
+  status     String    // "open", "in_progress", "completed", "cancelled"
+  startDate  DateTime?
+  endDate    DateTime?
+  clientId   String
+  createdBy  String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // Relations
+  client     Contact   @relation(fields: [clientId], references: [id])
+  user       User      @relation(fields: [createdBy], references: [id])
+}
+
+model Estimate {
+  id         String    @id @default(uuid())
+  leadName   String
+  address    String
+  scope      String
+  bidAmount  Float
+  startDate  DateTime?
+  status     String    // "pending", "accepted", "rejected"
+  notes      String?
+  clientId   String
+  createdBy  String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // Relations
+  client     Contact   @relation(fields: [clientId], references: [id])
+  user       User      @relation(fields: [createdBy], references: [id])
+}
+
+model Contact {
+  id            String      @id @default(uuid())
+  name          String
+  phoneNumber   String
+  email         String?
+  address       String?
+  tags          String[]
+  notes         String?
+  status        String      // "lead", "client", "former_client"
+  pipelineStage String?
+  createdBy     String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  user          User        @relation(fields: [createdBy], references: [id])
+  jobs          Job[]
+  estimates     Estimate[]
+}
+
+model CalendarEvent {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  location    String?
+  eventType   String    // "job", "estimate", "meeting", "other"
+  relatedId   String?   // ID of related job or estimate
+  createdBy   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model AiMessage {
+  id        String    @id @default(uuid())
+  message   String
+  response  String?
+  userId    String
+  createdAt DateTime  @default(now())
+
+  // Relations
+  user      User      @relation(fields: [userId], references: [id])
+}
