@@ -27,6 +27,12 @@ router.use(protect);
  *     responses:
  *       200:
  *         description: Successful operation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Contact'
  *   post:
  *     summary: Create a new contact
  *     tags: [Contacts]
@@ -39,13 +45,23 @@ router.use(protect);
  *           schema:
  *             type: object
  *             properties:
- *               firstName:
- *                 type: string
- *               lastName:
+ *               name:
  *                 type: string
  *               phoneNumber:
  *                 type: string
  *               email:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               notes:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *               pipelineStage:
  *                 type: string
  *     responses:
  *       201:
@@ -74,6 +90,10 @@ router.route('/')
  *     responses:
  *       200:
  *         description: Successful operation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Contact'
  *   put:
  *     summary: Update contact by ID
  *     tags: [Contacts]
@@ -91,16 +111,7 @@ router.route('/')
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               firstName:
- *                 type: string
- *               lastName:
- *                 type: string
- *               phoneNumber:
- *                 type: string
- *               email:
- *                 type: string
+ *             $ref: '#/components/schemas/Contact'
  *     responses:
  *       200:
  *         description: Contact updated successfully

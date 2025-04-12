@@ -18,6 +18,12 @@ router.use(protect);
  *     responses:
  *       200:
  *         description: Successful operation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Job'
  *   post:
  *     summary: Create a new job
  *     tags: [Jobs]
@@ -30,12 +36,24 @@ router.use(protect);
  *           schema:
  *             type: object
  *             properties:
- *               title:
+ *               name:
  *                 type: string
- *               description:
+ *               address:
  *                 type: string
- *               phoneNumber:
+ *               price:
+ *                 type: number
+ *                 format: float
+ *               status:
  *                 type: string
+ *               startDate:
+ *                 type: string
+ *                 format: date-time
+ *               endDate:
+ *                 type: string
+ *                 format: date-time
+ *               clientId:
+ *                 type: string
+ *                 format: uuid
  *     responses:
  *       201:
  *         description: Job created successfully
@@ -63,6 +81,10 @@ router.route('/')
  *     responses:
  *       200:
  *         description: Successful operation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Job'
  *   put:
  *     summary: Update job by ID
  *     tags: [Jobs]
@@ -82,12 +104,24 @@ router.route('/')
  *           schema:
  *             type: object
  *             properties:
- *               title:
+ *               name:
  *                 type: string
- *               description:
+ *               address:
  *                 type: string
- *               phoneNumber:
+ *               price:
+ *                 type: number
+ *                 format: float
+ *               status:
  *                 type: string
+ *               startDate:
+ *                 type: string
+ *                 format: date-time
+ *               endDate:
+ *                 type: string
+ *                 format: date-time
+ *               clientId:
+ *                 type: string
+ *                 format: uuid
  *     responses:
  *       200:
  *         description: Job updated successfully
