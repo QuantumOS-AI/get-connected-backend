@@ -7,8 +7,17 @@
     "projectName": "get-connected-backend",
     "machineOs": "Ubuntu 18.04",
     "buildNodeVersion": "20",
-    "buildCmd": "npm install && npm run build",
+    "buildCmd": "npm install",
     "startCmd": "npm run start",
-    "ports": [5000]
+    "ports": [5000],
+    "dockerfileLines": [
+      "FROM node:20-slim",
+      "WORKDIR /usr/src/app",
+      "COPY package*.json ./",
+      "RUN npm install",
+      "COPY . .",
+      "EXPOSE 5000",
+      "CMD [\"npm\", \"start\"]"
+    ]
   }
 }
