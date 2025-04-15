@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 2,
+  "captainDefinition": {
+    "version": 1,
+    "description": "Get Connected Backend",
+    "displayName": "get-connected-backend",
+    "projectName": "get-connected-backend",
+    "machineOs": "Ubuntu 18.04",
+    "buildNodeVersion": "20",
+    "buildCmd": "npm install && npm run build",
+    "startCmd": "npm run start",
+    "ports": [5000]
+  }
+}
