@@ -21,6 +21,34 @@ router.use(protect);
  *     tags: [Calendar]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Start date for filtering events (optional, defaults to beginning of current day)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: End date for filtering events (optional, defaults to end of current day)
+ *       - in: query
+ *         name: eventType
+ *         schema:
+ *           type: string
+ *         description: Filter events by type (optional)
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Page number for pagination (optional, defaults to 1)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Number of events per page (optional, defaults to 10)
  *     responses:
  *       200:
  *         description: Successful operation

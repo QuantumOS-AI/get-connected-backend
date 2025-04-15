@@ -1,6 +1,7 @@
 const prisma = require('../config/db');
 const AppError = require('../utils/appError');
 const { PAGINATION } = require('../config/constants');
+const { createCalendarEvent } = require('../utils/createCalendarEvent');
 
 // Get all estimates
 exports.getAllEstimates = async (req, res, next) => {
@@ -112,6 +113,19 @@ exports.createEstimate = async (req, res, next) => {
       data: estimate,
       message: 'Estimate created successfully'
     });
+
+    // Create calendar event
+    await createCalendarEvent({
+      title: estimate.leadName,
+      description: `Address: ${estimate.address}, Scope: ${estimate.scope}`,
+      startTime: estimate.createdAt,
+      endTime: estimate.createdAt,
+      location: estimate.address,
+      eventType: 'estimate',
+      relatedId: null,
+      createdBy: req.user.id
+    });
+
   } catch (error) {
     next(error);
   }
@@ -231,9 +245,15 @@ exports.changeStatus = async (req, res, next) => {
 // Get estimate metrics
 exports.getEstimateMetrics = async (req, res, next) => {
   try {
+    console.log('getEstimateMetrics function called');
     const { days = 30 } = req.query;
-    const daysAgo = new Date();
+    let daysAgo = new Date();
     daysAgo.setDate(daysAgo.getDate() - Number(days));
+
+    // Ensure daysAgo is not in the future
+    if (daysAgo > new Date()) {
+      daysAgo = new Date();
+    }
 
     // Get all estimates in the specified period
     const estimates = await prisma.estimate.findMany({
@@ -250,9 +270,11 @@ exports.getEstimateMetrics = async (req, res, next) => {
     const totalGrossBids = estimates.reduce((sum, estimate) => sum + estimate.bidAmount, 0);
 
     // Calculate close rate
-    const closeRate = estimates.length > 0 
-      ? (acceptedEstimates / estimates.length) * 100 
+    const closeRate = estimates.length > 0
+      ? (acceptedEstimates / estimates.length) * 100
       : 0;
+
+    const closeRateFormatted = estimates.length > 0 ? parseFloat(closeRate.toFixed(2)) : 0;
 
     res.status(200).json({
       success: true,
@@ -260,7 +282,7 @@ exports.getEstimateMetrics = async (req, res, next) => {
         estimatesCreated: estimates.length,
         acceptedEstimates,
         totalGrossBids,
-        closeRate: parseFloat(closeRate.toFixed(2))
+        closeRate: closeRateFormatted
       }
     });
   } catch (error) {
@@ -332,6 +354,19 @@ exports.convertToJob = async (req, res, next) => {
       },
       message: 'Estimate converted to job successfully'
     });
+
+    // Create calendar event for the new job
+    await createCalendarEvent({
+      title: job.name,
+      description: `Address: ${job.address}, Price: ${job.price}`,
+      startTime: job.createdAt,
+      endTime: job.createdAt,
+      location: job.address,
+      eventType: 'job',
+      relatedId: null,
+      createdBy: req.user.id
+    });
+
   } catch (error) {
     next(error);
   }

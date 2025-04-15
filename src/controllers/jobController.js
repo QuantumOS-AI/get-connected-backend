@@ -1,6 +1,7 @@
 const prisma = require('../config/db');
 const AppError = require('../utils/appError');
 const { PAGINATION } = require('../config/constants');
+const { createCalendarEvent } = require('../utils/createCalendarEvent');
 
 // Get all jobs
 exports.getAllJobs = async (req, res, next) => {
@@ -112,6 +113,19 @@ exports.createJob = async (req, res, next) => {
       data: job,
       message: 'Job created successfully'
     });
+
+    // Create calendar event
+    await createCalendarEvent({
+      title: job.name,
+      description: `Address: ${job.address}, Price: ${job.price}`,
+      startTime: job.createdAt,
+      endTime: job.createdAt,
+      location: job.address,
+      eventType: 'job',
+      relatedId: null,
+      createdBy: req.user.id
+    });
+
   } catch (error) {
     next(error);
   }
@@ -187,15 +201,20 @@ exports.deleteJob = async (req, res, next) => {
 exports.getJobMetrics = async (req, res, next) => {
   try {
     const { days = 30 } = req.query;
-    const daysAgo = new Date();
+    let daysAgo = new Date();
     daysAgo.setDate(daysAgo.getDate() - Number(days));
+
+    // Ensure daysAgo is not in the future
+    if (daysAgo > new Date()) {
+      daysAgo = new Date();
+    }
 
     // Get completed jobs in the specified period
     const completedJobs = await prisma.job.findMany({
       where: {
         createdBy: req.user.id,
         status: 'completed',
-        updatedAt: { gte: daysAgo }
+        createdAt: { gte: daysAgo }
       }
     });
 

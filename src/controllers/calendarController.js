@@ -10,11 +10,18 @@ exports.getEvents = async (req, res, next) => {
       endDate, 
       eventType, 
       page = PAGINATION.DEFAULT_PAGE, 
-      limit = PAGINATION.DEFAULT_LIMIT 
+      limit = PAGINATION.DEFAULT_LIMIT
     } = req.query;
 
-    if (!startDate || !endDate) {
-      return next(new AppError('Please provide start and end dates', 400));
+    // Default to current day if startDate or endDate are not provided
+    let start = startDate ? new Date(startDate) : new Date();
+    let end = endDate ? new Date(endDate) : new Date();
+
+    if (!startDate) {
+      start.setHours(0, 0, 0, 0); // Set to the beginning of the day
+    }
+    if (!endDate) {
+      end.setHours(23, 59, 59, 999); // Set to the end of the day
     }
 
     const skip = (Number(page) - 1) * Number(limit);
@@ -22,8 +29,8 @@ exports.getEvents = async (req, res, next) => {
     // Build where clause
     const where = {
       createdBy: req.user.id,
-      startTime: { gte: new Date(startDate) },
-      endTime: { lte: new Date(endDate) }
+      startTime: { gte: start },
+      endTime: { lte: end }
     };
 
     if (eventType) {

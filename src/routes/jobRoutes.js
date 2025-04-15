@@ -9,6 +9,20 @@ router.use(protect);
 
 /**
  * @swagger
+ * /api/jobs/metrics:
+ *   get:
+ *     summary: Get job metrics
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successful operation
+ */
+router.get('/metrics', getJobMetrics);
+
+/**
+ * @swagger
  * /api/jobs:
  *   get:
  *     summary: Get all jobs
@@ -147,17 +161,5 @@ router.route('/:id')
   .delete(deleteJob);
 
 
-/**
- * @swagger
- * /api/jobs/metrics:
- *   get:
- *     summary: Get job metrics
- *     tags: [Jobs]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Successful operation
- */
-router.get('/metrics', getJobMetrics);
+
 module.exports = router;

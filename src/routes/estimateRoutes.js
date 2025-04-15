@@ -68,10 +68,23 @@ router.use(protect);
  *       201:
  *         description: Estimate created successfully
  */
+/**
+ * @swagger
+ * /api/estimates/metrics:
+ *   get:
+ *     summary: Get estimate metrics
+ *     tags: [Estimates]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successful operation
+ */
+router.get('/metrics', getEstimateMetrics);
+
 router.route('/')
   .get(getAllEstimates)
   .post(createEstimate);
-
 
 /**
  * @swagger
