@@ -27,6 +27,12 @@ router.use(protect);
  *     responses:
  *       200:
  *         description: Successful operation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Estimate'
  *   post:
  *     summary: Create a new estimate
  *     tags: [Estimates]
@@ -39,12 +45,25 @@ router.use(protect);
  *           schema:
  *             type: object
  *             properties:
- *               title:
+ *               leadName:
  *                 type: string
- *               description:
+ *               address:
  *                 type: string
- *               phoneNumber:
+ *               scope:
  *                 type: string
+ *               bidAmount:
+ *                 type: number
+ *                 format: float
+ *               startDate:
+ *                 type: string
+ *                 format: date-time
+ *               status:
+ *                 type: string
+ *               notes:
+ *                 type: string
+ *               clientId:
+ *                 type: string
+ *                 format: uuid
  *     responses:
  *       201:
  *         description: Estimate created successfully
@@ -72,6 +91,10 @@ router.route('/')
  *     responses:
  *       200:
  *         description: Successful operation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Estimate'
  *   put:
  *     summary: Update estimate by ID
  *     tags: [Estimates]
@@ -91,12 +114,25 @@ router.route('/')
  *           schema:
  *             type: object
  *             properties:
- *               title:
+ *               leadName:
  *                 type: string
- *               description:
+ *               address:
  *                 type: string
- *               phoneNumber:
+ *               scope:
  *                 type: string
+ *               bidAmount:
+ *                 type: number
+ *                 format: float
+ *               startDate:
+ *                 type: string
+ *                 format: date-time
+ *               status:
+ *                 type: string
+ *               notes:
+ *                 type: string
+ *               clientId:
+ *                 type: string
+ *                 format: uuid
  *     responses:
  *       200:
  *         description: Estimate updated successfully

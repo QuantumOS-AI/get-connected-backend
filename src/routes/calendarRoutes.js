@@ -24,6 +24,12 @@ router.use(protect);
  *     responses:
  *       200:
  *         description: Successful operation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/CalendarEvent'
  *   post:
  *     summary: Create a new calendar event
  *     tags: [Calendar]
@@ -40,12 +46,19 @@ router.use(protect);
  *                 type: string
  *               description:
  *                 type: string
- *               start:
+ *               startTime:
  *                 type: string
  *                 format: date-time
- *               end:
+ *               endTime:
  *                 type: string
  *                 format: date-time
+ *               location:
+ *                 type: string
+ *               eventType:
+ *                 type: string
+ *               relatedId:
+ *                 type: string
+ *                 format: uuid
  *     responses:
  *       201:
  *         description: Calendar event created successfully
@@ -81,12 +94,19 @@ router.route('/events')
  *                 type: string
  *               description:
  *                 type: string
- *               start:
+ *               startTime:
  *                 type: string
  *                 format: date-time
- *               end:
+ *               endTime:
  *                 type: string
  *                 format: date-time
+ *               location:
+ *                 type: string
+ *               eventType:
+ *                 type: string
+ *               relatedId:
+ *                 type: string
+ *                 format: uuid
  *     responses:
  *       200:
  *         description: Calendar event updated successfully

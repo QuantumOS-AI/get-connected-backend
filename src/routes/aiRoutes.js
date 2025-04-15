@@ -31,6 +31,10 @@ router.use(protect);
  *     responses:
  *       200:
  *         description: Successful operation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AiMessage'
  */
 router.post('/message', processMessage);
 
@@ -45,6 +49,12 @@ router.post('/message', processMessage);
  *     responses:
  *       200:
  *         description: Successful operation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/AiMessage'
  */
 router.get('/history', getConversationHistory);
 

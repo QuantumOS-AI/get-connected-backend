@@ -25,9 +25,19 @@ const router = express.Router();
  *                 type: string
  *               password:
  *                 type: string
+ *               companyName:
+ *                 type: string
+ *               logo:
+ *                 type: string
+ *               timezone:
+ *                 type: string
  *     responses:
  *       201:
  *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
  */
 router.post('/register', register);
 
@@ -51,6 +61,10 @@ router.post('/register', register);
  *     responses:
  *       200:
  *         description: User logged in successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
  */
 router.post('/login', login);
 
@@ -70,7 +84,7 @@ router.post('/login', login);
  *           schema:
  *             type: object
  *             properties:
- *               oldPassword:
+ *               currentPassword:
  *                 type: string
  *               newPassword:
  *                 type: string
