@@ -1,7 +1,14 @@
 {
   "schemaVersion": 2,
-  "baseImage": "node:20",
-  "buildScript": "npm install && npm run build",
-  "startCommand": "npm run start",
+  "dockerfileLines": [
+    "FROM node:20",
+    "WORKDIR /usr/src/app",
+    "COPY package*.json ./",
+    "RUN npm install",
+    "COPY . .",
+    "RUN npm run build",
+    "EXPOSE 5000",
+    "CMD [\"npm\", \"run\", \"start\"]"
+  ],
   "exposedPorts": [5000]
 }
