@@ -1,11 +1,25 @@
 const express = require('express');
-const { getCurrentUser, updateProfile, updateCompanyInfo, deleteAccount } = require('../controllers/userController');
-const { protect } = require('../middleware/auth');
+const { getCurrentUser, updateProfile, updateCompanyInfo, deleteAccount, getAllUsers } = require('../controllers/userController');
+const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
 
 // All routes need authentication
 router.use(protect);
+
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Get all users (Admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successful operation
+ */
+router.get('/', authorize('ADMIN'), getAllUsers);
 /**
  * @swagger
  * /api/users/me:

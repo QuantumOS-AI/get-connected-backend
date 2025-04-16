@@ -18,9 +18,18 @@ exports.getAllContacts = async (req, res, next) => {
     const skip = (Number(page) - 1) * Number(limit);
 
     // Build where clause
-    let where = { createdBy: req.user.id };
-    if (status) where.status = status;
-    if (pipelineStage) where.pipelineStage = pipelineStage;
+    let where = {};
+    if (req.user.role === 'USER') {
+      where = { createdBy: req.user.id };
+    }
+    if (status) {
+      where.status = status;
+    }
+    if (pipelineStage) {
+      where.pipelineStage = pipelineStage;
+    }
+
+    // Add search functionality if provided
 
     // Add search functionality if provided
     if (search) {
@@ -47,7 +56,15 @@ exports.getAllContacts = async (req, res, next) => {
       where,
       orderBy,
       skip,
-      take: Number(limit)
+      take: Number(limit),
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
 
     res.status(200).json({
@@ -68,11 +85,16 @@ exports.getAllContacts = async (req, res, next) => {
 // Get contact by ID
 exports.getContactById = async (req, res, next) => {
   try {
+    let where = {
+      id: req.params.id,
+    };
+
+    if (req.user.role === 'USER') {
+      where.createdBy = req.user.id;
+    }
+
     const contact = await prisma.contact.findFirst({
-      where: {
-        id: req.params.id,
-        createdBy: req.user.id
-      }
+      where: where
     });
 
     if (!contact) {

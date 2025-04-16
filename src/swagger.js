@@ -70,7 +70,7 @@ const options = {
           createdBy: {
             type: 'string',
             format: 'uuid',
-            description: 'The ID of the user who created the estimate'
+            description: 'The ID of the user who created the estimate (Only applicable for admin users)'
           },
           createdAt: {
             type: 'string',
@@ -153,6 +153,10 @@ const options = {
             type: 'string',
             description: 'The timezone of the user'
           },
+          role: {
+            type: 'string',
+            description: 'The role of the user (USER, ADMIN)'
+          },
           createdAt: {
             type: 'string',
             format: 'date-time',
@@ -212,7 +216,7 @@ const options = {
           createdBy: {
             type: 'string',
             format: 'uuid',
-            description: 'The ID of the user who created the job'
+            description: 'The ID of the user who created the job (Only applicable for admin users)'
           },
           createdAt: {
             type: 'string',

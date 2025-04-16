@@ -16,8 +16,11 @@ exports.getAllEstimates = async (req, res, next) => {
 
     const skip = (Number(page) - 1) * Number(limit);
 
-    // Build where clause
-    const where = { createdBy: req.user.id };
+   // Build where clause
+    let where = {};
+    if (req.user.role === 'USER') {
+      where.createdBy = req.user.id;
+    }
     if (status) where.status = status;
 
     // Count total estimates matching query
@@ -63,11 +66,15 @@ exports.getAllEstimates = async (req, res, next) => {
 // Get estimate by ID
 exports.getEstimateById = async (req, res, next) => {
   try {
+    let where = {
+      id: req.params.id,
+    };
+
+    if (req.user.role === 'USER') {
+      where.createdBy = req.user.id;
+    }
     const estimate = await prisma.estimate.findFirst({
-      where: {
-        id: req.params.id,
-        createdBy: req.user.id
-      },
+      where: where,
       include: {
         client: true
       }
@@ -91,7 +98,8 @@ exports.createEstimate = async (req, res, next) => {
   try {
     const estimateData = {
       ...req.body,
-      createdBy: req.user.id
+      createdBy:
+        req.user.role === 'ADMIN' ? req.body.createdBy : req.user.id,
     };
 
     const estimate = await prisma.estimate.create({
@@ -317,7 +325,7 @@ exports.convertToJob = async (req, res, next) => {
       endDate: req.body.endDate || null,
       status: 'open',
       clientId: estimate.clientId,
-      createdBy: req.user.id
+      createdBy: req.user.role === 'ADMIN' ? req.body.createdBy : req.user.id
     };
 
     // Use a transaction to ensure both operations succeed or fail together

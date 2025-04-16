@@ -99,3 +99,23 @@ exports.deleteAccount = async (req, res, next) => {
     next(error);
   }
 };
+
+// Get all users (Admin only)
+exports.getAllUsers = async (req, res, next) => {
+  try {
+    const users = await prisma.user.findMany();
+
+    // Remove password from response
+    const usersWithoutPassword = users.map(user => {
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    });
+
+    res.status(200).json({
+      success: true,
+      data: usersWithoutPassword
+    });
+  } catch (error) {
+    next(error);
+  }
+};

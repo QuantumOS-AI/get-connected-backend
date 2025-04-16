@@ -37,7 +37,8 @@ exports.register = async (req, res, next) => {
         password: hashedPassword,
         companyName,
         logo,
-        timezone: timezone || 'UTC'
+        timezone: timezone || 'UTC',
+        role: 'USER'
       }
     });
 

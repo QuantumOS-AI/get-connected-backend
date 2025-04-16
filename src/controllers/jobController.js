@@ -16,8 +16,11 @@ exports.getAllJobs = async (req, res, next) => {
     
     const skip = (Number(page) - 1) * Number(limit);
 
-    // Build where clause
-    const where = { createdBy: req.user.id };
+   // Build where clause
+    let where = {};
+    if (req.user.role === 'USER') {
+      where.createdBy = req.user.id;
+    }
     if (status) where.status = status;
 
     // Count total jobs matching query
@@ -63,11 +66,16 @@ exports.getAllJobs = async (req, res, next) => {
 // Get job by ID
 exports.getJobById = async (req, res, next) => {
   try {
+    let where = {
+      id: req.params.id,
+    };
+
+    if (req.user.role === 'USER') {
+      where.createdBy = req.user.id;
+    }
+
     const job = await prisma.job.findFirst({
-      where: {
-        id: req.params.id,
-        createdBy: req.user.id
-      },
+      where: where,
       include: {
         client: true
       }
@@ -91,7 +99,7 @@ exports.createJob = async (req, res, next) => {
   try {
     const jobData = {
       ...req.body,
-      createdBy: req.user.id
+      createdBy: req.user.role === 'ADMIN' ? req.body.createdBy : req.user.id,
     };
 
     const job = await prisma.job.create({
