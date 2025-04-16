@@ -27,16 +27,13 @@ setupFolders();
 // Create Express app
 const app = express();
 
-
 // Set up middleware
-const corsOptions = {
-  origin: 'http://localhost:5173',
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
-
 app.use(helmet());
 app.use(compression());
-app.use(cors(corsOptions));
+
+// ✅ Allow any origin for CORS
+app.use(cors());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -62,7 +59,6 @@ app.use(errorHandler);
 
 // Start server
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
 });
