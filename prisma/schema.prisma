@@ -73,6 +73,7 @@ model Estimate {
   // Relations
   client     Contact   @relation(fields: [clientId], references: [id])
   user       User      @relation(fields: [createdBy], references: [id])
+  aiMessages AiMessage[]
 }
 
 model Contact {
@@ -93,6 +94,7 @@ model Contact {
   user          User        @relation(fields: [createdBy], references: [id])
   jobs          Job[]
   estimates     Estimate[]
+  aiMessages    AiMessage[]
 }
 
 model CalendarEvent {
@@ -110,12 +112,16 @@ model CalendarEvent {
 }
 
 model AiMessage {
-  id        String    @id @default(uuid())
-  message   String
-  response  String?
-  userId    String
-  createdAt DateTime  @default(now())
+  id          String    @id @default(uuid())
+  message     String
+  senderType  String    // "AI" or "USER"
+  userId      String    // The user interacting or receiving the message
+  contactId   String?   // Link to the relevant contact
+  estimateId  String?   // Link to the relevant estimate (optional)
+  createdAt   DateTime  @default(now())
 
   // Relations
-  user      User      @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+  contact     Contact?  @relation(fields: [contactId], references: [id])
+  estimate    Estimate? @relation(fields: [estimateId], references: [id])
 }

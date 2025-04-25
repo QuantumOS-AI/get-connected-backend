@@ -8,6 +8,8 @@ const dotenv = require('dotenv');
 const { errorHandler } = require('./middleware/error');
 const { setupFolders } = require('./utils/setup');
 const { logger } = require('./utils/logger');
+const http = require('http');
+const { WebSocketServer, WebSocket } = require('ws');
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
@@ -27,13 +29,13 @@ setupFolders();
 // Create Express app
 const app = express();
 
+// Create HTTP server
+const server = http.createServer(app);
+
 // Set up middleware
 app.use(helmet());
 app.use(compression());
-
-// ✅ Allow any origin for CORS
 app.use(cors());
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -57,9 +59,44 @@ app.get('/health', (req, res) => {
 // Error handling middleware
 app.use(errorHandler);
 
+// WebSocket Server
+const wss = new WebSocketServer({ server });
+
+wss.on('connection', ws => {
+  logger.info('Client connected to WebSocket');
+
+  ws.on('message', message => {
+    logger.info(`Received message: ${message}`);
+    // You can broadcast the message to all connected clients
+    wss.clients.forEach(client => {
+      if (client !== ws && client.readyState === WebSocket.OPEN) {
+        client.send(`Broadcast: ${message}`);
+      }
+    });
+  });
+
+  ws.on('close', () => {
+    logger.info('Client disconnected');
+  });
+
+  ws.on('error', err => logger.error('WebSocket error:', err));
+});
+
+// Function to send message to all connected clients
+function broadcast(data) {
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(data));
+    }
+  });
+}
+
+// Expose broadcast function to be used in other modules
+module.exports = { broadcast };
+
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
 });
 

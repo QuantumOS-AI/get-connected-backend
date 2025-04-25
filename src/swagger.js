@@ -401,30 +401,72 @@ const options = {
           id: {
             type: 'string',
             format: 'uuid',
-            description: 'The AI message ID'
+            description: 'The unique identifier for the AI message'
           },
           message: {
             type: 'string',
-            description: 'The message sent to the AI'
+            description: 'The content of the message'
           },
-          response: {
+          senderType: {
             type: 'string',
-            description: 'The response from the AI'
+            enum: ['AI', 'USER'],
+            description: 'Indicates whether the message was sent by the AI or the User'
           },
           userId: {
             type: 'string',
             format: 'uuid',
-            description: 'The ID of the user who sent the message'
+            description: 'The ID of the user associated with this conversation thread'
+          },
+          contactId: {
+            type: 'string',
+            format: 'uuid',
+            nullable: true,
+            description: 'The ID of the contact this message relates to'
+          },
+          estimateId: {
+            type: 'string',
+            format: 'uuid',
+            nullable: true,
+            description: 'The ID of the estimate this message relates to (optional)'
           },
           createdAt: {
             type: 'string',
             format: 'date-time',
             description: 'The date and time the message was created'
+          },
+          // Optional: Include related data if returned by API endpoints
+          user: {
+            type: 'object',
+            properties: {
+              id: { type: 'string', format: 'uuid' },
+              name: { type: 'string' }
+            },
+            description: 'Basic info of the associated user (if included in response)'
+          },
+          contact: {
+            type: 'object',
+            properties: {
+              id: { type: 'string', format: 'uuid' },
+              name: { type: 'string' }
+            },
+            description: 'Basic info of the associated contact (if included in response)'
+          },
+          estimate: {
+             type: 'object',
+            properties: {
+              id: { type: 'string', format: 'uuid' }
+            },
+            description: 'Basic info of the associated estimate (if included in response)'
           }
         },
         required: [
+          'id',
           'message',
-          'userId'
+          'senderType',
+          'userId',
+          'createdAt'
+          // contactId is required for saving, but might be null in some contexts? Adjust if needed.
+          // estimateId is optional
         ]
       }
     }
