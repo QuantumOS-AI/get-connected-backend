@@ -3,7 +3,8 @@ const {
   handleWebhookMessage,
   getConversation,
   handleUserReply,
-  clearConversationHistory // Keep if needed, otherwise remove
+  clearConversationHistory, // Keep if needed, otherwise remove
+  getConversationList
 } = require('../controllers/aiController');
 const { protect } = require('../middleware/auth');
 
@@ -186,6 +187,51 @@ router.get('/conversation/contact/:contactId', getConversation);
  *         description: Estimate not found or access denied
  */
 router.get('/conversation/estimate/:estimateId', getConversation);
+
+/**
+ * @swagger
+ * /api/ai/conversations:
+ *   get:
+ *     summary: Get a list of all conversations for the logged-in user
+ *     tags: [AI Conversation]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successful operation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 count:
+ *                   type: integer
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       contactId:
+ *                         type: string
+ *                         format: uuid
+ *                       estimateId:
+ *                         type: string
+ *                         format: uuid
+ *                         nullable: true
+ *                       contactName:
+ *                         type: string
+ *                         nullable: true
+ *                       estimateLeadName:
+ *                         type: string
+ *                         nullable: true
+ *                       lastMessage:
+ *                         $ref: '#/components/schemas/AiMessage' # Assuming AiMessage schema exists
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/conversations', getConversationList);
 
 
 /**

@@ -34,7 +34,7 @@ exports.handleWebhookMessage = async (req, res, next) => {
         console.error(`Webhook Error: Contact with ID ${contactId} not found or doesn't belong to user ${userId}.`);
         return res.status(200).json({ success: true, message: 'Received, but contact not found or invalid.' });
     }
-    
+
     // Validate estimateId if provided (optional but recommended)
     if (estimateId) {
         const estimateExists = await prisma.estimate.findFirst({ where: { id: estimateId, createdBy: userId, clientId: contactId } });
@@ -99,7 +99,7 @@ exports.getConversation = async (req, res, next) => {
              return next(new AppError('Estimate does not belong to the specified contact', 400));
         }
         // If only estimateId is provided, ensure contactId in whereClause matches
-        whereClause.contactId = estimate.clientId; 
+        whereClause.contactId = estimate.clientId;
     }
 
 
@@ -172,7 +172,7 @@ exports.handleUserReply = async (req, res, next) => {
             data: userMessage
         });
     }
-    
+
     try {
         await axios.post(N8N_REPLY_WEBHOOK_URL, {
             userId,
@@ -210,7 +210,7 @@ exports.clearConversationHistory = async (req, res, next) => {
     // Example: const { contactId } = req.query;
     // const whereClause = { userId: req.user.id };
     // if (contactId) whereClause.contactId = contactId;
-    
+
     await prisma.aiMessage.deleteMany({
       where: { userId: req.user.id } // Only clear for the logged-in user
     });
@@ -218,6 +218,102 @@ exports.clearConversationHistory = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: 'User\'s conversation history cleared successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get a list of all conversations for the logged-in user
+exports.getConversationList = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    // Find all distinct contactId and estimateId for the user's messages
+    const distinctConversations = await prisma.aiMessage.findMany({
+      where: { userId },
+      select: {
+        contactId: true,
+        estimateId: true,
+      },
+      distinct: ['contactId', 'estimateId'],
+    });
+
+    const conversationList = [];
+
+    for (const convo of distinctConversations) {
+      let lastMessage;
+      let relatedEntity;
+
+      if (convo.contactId && convo.estimateId) {
+        // Case 1: Message is linked to both a contact and an estimate
+        lastMessage = await prisma.aiMessage.findFirst({
+          where: {
+            userId,
+            contactId: convo.contactId,
+            estimateId: convo.estimateId,
+          },
+          orderBy: { createdAt: 'desc' },
+        });
+        relatedEntity = await prisma.estimate.findUnique({
+            where: { id: convo.estimateId },
+            select: { id: true, leadName: true, clientId: true }
+        });
+        // Ensure the estimate belongs to the contact and user
+        if (!relatedEntity || relatedEntity.clientId !== convo.contactId) {
+             continue; // Skip if estimate is invalid or doesn't match contact
+        }
+
+      } else if (convo.contactId && !convo.estimateId) {
+        // Case 2: Message is linked only to a contact (general contact conversation)
+        // Find the last message for this contact that is NOT linked to an estimate
+         lastMessage = await prisma.aiMessage.findFirst({
+            where: {
+                userId,
+                contactId: convo.contactId,
+                estimateId: null, // Explicitly look for messages NOT linked to an estimate
+            },
+            orderBy: { createdAt: 'desc' },
+         });
+         relatedEntity = await prisma.contact.findUnique({
+            where: { id: convo.contactId },
+            select: { id: true, name: true }
+         });
+         // Ensure the contact belongs to the user
+         if (!relatedEntity) {
+            continue; // Skip if contact is invalid
+         }
+
+      } else if (convo.estimateId && !convo.contactId) {
+           // This case should ideally not happen based on schema (estimate requires clientId),
+           // but including for robustness.
+           console.warn(`Found AiMessage with estimateId ${convo.estimateId} but no contactId for user ${userId}. Skipping.`);
+           continue; // Skip messages with estimateId but no contactId
+      } else {
+          // Should not happen if distinct query works correctly, but for safety
+          continue;
+      }
+
+
+      if (lastMessage && relatedEntity) {
+        conversationList.push({
+          contactId: convo.contactId,
+          estimateId: convo.estimateId,
+          contactName: relatedEntity.name || null, // Use contact name if available
+          estimateLeadName: relatedEntity.leadName || null, // Use estimate lead name if available
+          lastMessage,
+        });
+      }
+    }
+
+    // Sort conversations by the timestamp of the last message (most recent first)
+    conversationList.sort((a, b) => b.lastMessage.createdAt.getTime() - a.lastMessage.createdAt.getTime());
+
+
+    res.status(200).json({
+      success: true,
+      count: conversationList.length,
+      data: conversationList,
     });
   } catch (error) {
     next(error);
