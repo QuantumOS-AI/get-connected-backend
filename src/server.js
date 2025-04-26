@@ -65,6 +65,12 @@ const wss = new WebSocketServer({ server });
 wss.on('connection', ws => {
   logger.info('Client connected to WebSocket');
 
+    const interval = setInterval(() => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.ping();
+    }
+  }, 15000); // Send a ping every 15 seconds
+
   ws.on('message', message => {
     logger.info(`Received message: ${message}`);
     // You can broadcast the message to all connected clients
