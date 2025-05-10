@@ -36,6 +36,7 @@ model User {
   estimates   Estimate[]
   contacts    Contact[]
   aiMessages  AiMessage[]
+  alliBotMessages AlliBotMessage[]
 }
 
 model Job {
@@ -124,4 +125,15 @@ model AiMessage {
   user        User      @relation(fields: [userId], references: [id])
   contact     Contact?  @relation(fields: [contactId], references: [id])
   estimate    Estimate? @relation(fields: [estimateId], references: [id])
+}
+
+model AlliBotMessage {
+  id          String   @id @default(uuid())
+  message     String
+  senderType  String   // "USER" or "ALLI_BOT"
+  userId      String   // The user interacting with AlliBot
+  createdAt   DateTime @default(now())
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id])
 }
