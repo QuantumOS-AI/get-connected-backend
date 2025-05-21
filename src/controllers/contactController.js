@@ -115,7 +115,7 @@ exports.createContact = async (req, res, next) => {
   try {
     const contactData = {
       ...req.body,
-      createdBy: req.user.id
+      createdBy: req.user.role === 'ADMIN' ? req.body.createdBy : req.user.id
     };
 
     // Ensure tags is an array
