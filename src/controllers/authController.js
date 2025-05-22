@@ -109,16 +109,20 @@ exports.login = async (req, res, next) => {
 // Change password
 exports.changePassword = async (req, res, next) => {
   try {
-    const { currentPassword, newPassword } = req.body;
+    const { phoneNumber, currentPassword, newPassword } = req.body;
 
-    if (!currentPassword || !newPassword) {
-      return next(new AppError('Please provide current password and new password', 400));
+    if (!phoneNumber || !currentPassword || !newPassword) {
+      return next(new AppError('Please provide phone number, current password and new password', 400));
     }
 
-    // Get user
+    // Get user by phone number
     const user = await prisma.user.findUnique({
-      where: { id: req.user.id }
+      where: { phoneNumber }
     });
+
+    if (!user) {
+      return next(new AppError('User not found', 404));
+    }
 
     // Check if current password is correct
     const isPasswordCorrect = await bcrypt.compare(currentPassword, user.password);
@@ -133,7 +137,7 @@ exports.changePassword = async (req, res, next) => {
 
     // Update password
     await prisma.user.update({
-      where: { id: req.user.id },
+      where: { id: user.id },
       data: { password: hashedPassword }
     });
 

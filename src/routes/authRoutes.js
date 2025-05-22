@@ -82,6 +82,8 @@ router.post('/login', login);
  *           schema:
  *             type: object
  *             properties:
+ *               phoneNumber:
+ *                 type: string
  *               currentPassword:
  *                 type: string
  *               newPassword:
