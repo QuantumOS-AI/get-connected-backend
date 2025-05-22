@@ -35,4 +35,13 @@ module.exports = {
       MEETING: 'meeting',
       OTHER: 'other',
     },
+
+    // Notification event types
+    NOTIFICATION_EVENT: {
+      NEW_ESTIMATE: 'new_estimate',
+      ESTIMATE_ACCEPTED: 'estimate_accepted',
+      JOB_COMPLETE: 'job_complete',
+      PAYMENT_RECEIVED: 'payment_received',
+      DAILY_SUMMARY: 'daily_summary',
+    },
   };

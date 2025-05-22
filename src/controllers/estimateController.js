@@ -1,7 +1,8 @@
 const prisma = require('../config/db');
 const AppError = require('../utils/appError');
-const { PAGINATION } = require('../config/constants');
+const { PAGINATION, NOTIFICATION_EVENT, ESTIMATE_STATUS } = require('../config/constants');
 const { createCalendarEvent } = require('../utils/createCalendarEvent');
+const { createNotification } = require('./notificationController');
 
 // Get all estimates
 exports.getAllEstimates = async (req, res, next) => {
@@ -134,6 +135,15 @@ exports.createEstimate = async (req, res, next) => {
       createdBy: req.user.id
     });
 
+    // Send notification for new estimate
+    await createNotification(
+      req.user.id,
+      NOTIFICATION_EVENT.NEW_ESTIMATE,
+      'New Estimate Created',
+      `New estimate created for ${estimate.leadName} at ${estimate.address}.`,
+      estimate.id
+    );
+
   } catch (error) {
     next(error);
   }
@@ -225,6 +235,11 @@ exports.changeStatus = async (req, res, next) => {
       return next(new AppError('Estimate not found', 404));
     }
 
+    // Check if status is being updated to accepted
+    const isAcceptingEstimate = 
+      status === ESTIMATE_STATUS.ACCEPTED && 
+      estimateExists.status !== ESTIMATE_STATUS.ACCEPTED;
+
     const estimate = await prisma.estimate.update({
       where: { id: req.params.id },
       data: { status },
@@ -239,6 +254,17 @@ exports.changeStatus = async (req, res, next) => {
         }
       }
     });
+
+    // Send notification if estimate is accepted
+    if (isAcceptingEstimate) {
+      await createNotification(
+        req.user.id,
+        NOTIFICATION_EVENT.ESTIMATE_ACCEPTED,
+        'Estimate Accepted',
+        `Estimate for ${estimate.leadName} has been accepted.`,
+        estimate.id
+      );
+    }
 
     res.status(200).json({
       success: true,
@@ -328,6 +354,9 @@ exports.convertToJob = async (req, res, next) => {
       createdBy: req.user.role === 'ADMIN' ? req.body.createdBy : req.user.id
     };
 
+    // Check if estimate is being accepted through conversion
+    const isAcceptingEstimate = estimate.status !== ESTIMATE_STATUS.ACCEPTED;
+
     // Use a transaction to ensure both operations succeed or fail together
     const [job, updatedEstimate] = await prisma.$transaction([
       // Create the job
@@ -349,7 +378,7 @@ exports.convertToJob = async (req, res, next) => {
       prisma.estimate.update({
         where: { id: estimate.id },
         data: { 
-          status: estimate.status !== 'accepted' ? 'accepted' : estimate.status 
+          status: isAcceptingEstimate ? ESTIMATE_STATUS.ACCEPTED : estimate.status 
         }
       })
     ]);
@@ -374,6 +403,17 @@ exports.convertToJob = async (req, res, next) => {
       relatedId: null,
       createdBy: req.user.id
     });
+
+    // Send notification if estimate is accepted through conversion
+    if (isAcceptingEstimate) {
+      await createNotification(
+        req.user.id,
+        NOTIFICATION_EVENT.ESTIMATE_ACCEPTED,
+        'Estimate Accepted and Converted',
+        `Estimate for ${estimate.leadName} has been accepted and converted to a job.`,
+        estimate.id
+      );
+    }
 
   } catch (error) {
     next(error);
