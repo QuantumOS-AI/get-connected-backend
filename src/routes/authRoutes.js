@@ -75,8 +75,6 @@ router.post('/login', login);
  *   post:
  *     summary: Change user password
  *     tags: [Auth]
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -92,7 +90,6 @@ router.post('/login', login);
  *       200:
  *         description: Password changed successfully
  */
-// Protected routes
-router.post('/change-password', protect, changePassword);
+router.post('/change-password', changePassword);
 
 module.exports = router;
