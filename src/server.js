@@ -19,6 +19,7 @@ const estimateRoutes = require('./routes/estimateRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 const calendarRoutes = require('./routes/calendarRoutes');
 const aiRoutes = require('./routes/aiRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 // Load environment variables
 dotenv.config();
@@ -47,6 +48,7 @@ app.use('/api/estimates', estimateRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/calendar', calendarRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

@@ -19,23 +19,25 @@ enum Role {
 }
 
 model User {
-  id          String      @id @default(uuid())
-  name        String
-  phoneNumber String      @unique
-  email       String?     @unique
-  password    String
-  companyName String?
-  logo        String?
-  timezone    String      @default("UTC")
-  role        Role        @default(USER)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id                  String                @id @default(uuid())
+  name                String
+  phoneNumber         String                @unique
+  email               String?               @unique
+  password            String
+  companyName         String?
+  logo                String?
+  timezone            String                @default("UTC")
+  role                Role                  @default(USER)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
 
   // Relations
-  jobs        Job[]
-  estimates   Estimate[]
-  contacts    Contact[]
-  aiMessages  AiMessage[]
+  jobs                Job[]
+  estimates           Estimate[]
+  contacts            Contact[]
+  aiMessages          AiMessage[]
+  notificationSettings NotificationSetting[]
+  notifications       Notification[]
 }
 
 model Job {
@@ -125,4 +127,34 @@ model AiMessage {
   user        User      @relation(fields: [userId], references: [id])
   contact     Contact?  @relation(fields: [contactId], references: [id])
   estimate    Estimate? @relation(fields: [estimateId], references: [id])
+}
+
+model NotificationSetting {
+  id            String   @id @default(uuid())
+  userId        String
+  eventType     String   // "new_estimate", "estimate_accepted", "job_complete", "payment_received", "daily_summary"
+  emailEnabled  Boolean  @default(true)
+  smsEnabled    Boolean  @default(false)
+  appEnabled    Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  user          User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, eventType])
+}
+
+model Notification {
+  id            String   @id @default(uuid())
+  userId        String
+  title         String
+  message       String
+  eventType     String   // "new_estimate", "estimate_accepted", "job_complete", "payment_received", "daily_summary"
+  isRead        Boolean  @default(false)
+  relatedId     String?  // ID of related entity (job, estimate, etc.)
+  createdAt     DateTime @default(now())
+
+  // Relations
+  user          User     @relation(fields: [userId], references: [id])
 }

@@ -1,7 +1,8 @@
 const prisma = require('../config/db');
 const AppError = require('../utils/appError');
-const { PAGINATION } = require('../config/constants');
+const { PAGINATION, NOTIFICATION_EVENT, JOB_STATUS } = require('../config/constants');
 const { createCalendarEvent } = require('../utils/createCalendarEvent');
+const { createNotification } = require('./notificationController');
 
 // Get all jobs
 exports.getAllJobs = async (req, res, next) => {
@@ -153,6 +154,11 @@ exports.updateJob = async (req, res, next) => {
       return next(new AppError('Job not found', 404));
     }
 
+    // Check if status is being updated to completed
+    const isCompletingJob = 
+      req.body.status === JOB_STATUS.COMPLETED && 
+      jobExists.status !== JOB_STATUS.COMPLETED;
+
     const job = await prisma.job.update({
       where: { id: req.params.id },
       data: req.body,
@@ -167,6 +173,17 @@ exports.updateJob = async (req, res, next) => {
         }
       }
     });
+
+    // Send notification if job is completed
+    if (isCompletingJob) {
+      await createNotification(
+        req.user.id,
+        NOTIFICATION_EVENT.JOB_COMPLETE,
+        'Job Completed',
+        `Job "${job.name}" has been marked as completed.`,
+        job.id
+      );
+    }
 
     res.status(200).json({
       success: true,
