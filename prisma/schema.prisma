@@ -46,6 +46,7 @@ model Job {
   status     String    // "open", "in_progress", "completed", "cancelled"
   startDate  DateTime?
   endDate    DateTime?
+  invoiceUrl String?   // URL to invoice document
   clientId   String
   createdBy  String
   createdAt  DateTime  @default(now())

@@ -68,6 +68,9 @@ router.get('/metrics', getJobMetrics);
  *               clientId:
  *                 type: string
  *                 format: uuid
+ *               invoiceUrl:
+ *                 type: string
+ *                 description: URL to the invoice document (optional)
  *     responses:
  *       201:
  *         description: Job created successfully
@@ -136,6 +139,9 @@ router.route('/')
  *               clientId:
  *                 type: string
  *                 format: uuid
+ *               invoiceUrl:
+ *                 type: string
+ *                 description: URL to the invoice document (optional)
  *     responses:
  *       200:
  *         description: Job updated successfully
